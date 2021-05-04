@@ -3,6 +3,7 @@ namespace App\Controllers;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Controllers\BaseController;
+use Exception;
 
 class ProveedoresController extends BaseController{
     public function getAll(Request $req, Response $res, $args){
@@ -24,21 +25,29 @@ class ProveedoresController extends BaseController{
             ->withStatus(200);
     }
     public function addElement(Request $req, Response $res, array $args){
-        $context = $this->container->get('db');
+        try {
+            $context = $this->container->get('db');
 
-        $data = json_decode($req->getBody(), true);
-        
-        $qry = "INSERT INTO proveedor (nombre, telefono, email, direccion, referencia) values (:nombre, :telefono, :email, :direccion, :referencia)";
-        $payload = $context->prepare($qry);
-        $payload->bindParam(':nombre', $data['nombre']);
-        $payload->bindParam(':telefono', $data['telefono']);
-        $payload->bindParam(':email', $data['email']);
-        $payload->bindParam(':direccion', $data['direccion']);
-        $payload->bindParam(':referencia', $data['referencia']);
-        // var_dump($payload);
-        // die();
-        $payload->execute();
-        return $res->withStatus(200);
+            $data = json_decode($req->getBody(), true);
+            
+            $qry = "INSERT INTO proveedor (nombre, telefono, email, direccion, referencia) values (:nombre, :telefono, :email, :direccion, :referencia)";
+            $payload = $context->prepare($qry);
+            $payload->bindParam(':nombre', $data['nombre']);
+            $payload->bindParam(':telefono', $data['telefono']);
+            $payload->bindParam(':email', $data['email']);
+            $payload->bindParam(':direccion', $data['direccion']);
+            $payload->bindParam(':referencia', $data['referencia']);
+            // var_dump($payload);
+            // die();
+            $payload->execute();
+            return $res
+                ->withHeader('Content-type', 'application/json')
+                ->withStatus(200);
+        } catch(Exception $e) {
+            return $res
+                ->withHeader('Content-type', 'application/json')
+                ->withStatus($e->getCode());
+        }
     }
     public function updateElement(Request $req, Response $res, array $args){
         $context = $this->container->get('db');
@@ -59,13 +68,22 @@ class ProveedoresController extends BaseController{
         return $res->withStatus(200);
     }
     public function deleteElement(Request $req, Response $res, array $args){
-        $context = $this->container->get('db');
+        try {
+            $id = (int)$args['id'];
+            $context = $this->container->get('db');
 
-        $qry = "DELETE FROM proveedor WHERE proveedor_id =" . $args['id'];
+            $qry = "DELETE FROM proveedor WHERE proveedor_id =" . $id;
 
-        $payload = $context->prepare($qry);
-        $payload->execute();
-        
-        return $res->withStatus(200);
+            $payload = $context->prepare($qry);
+            $payload->execute();
+            
+            return $res
+                ->withHeader('Content-type', 'application/json')
+                ->withStatus(200);
+        } catch (Exception $e) {
+            return $res
+                ->withHeader('Content-type', 'application/json')
+                ->withStatus($e->getCode());
+        }
     }
 }

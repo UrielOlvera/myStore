@@ -4,7 +4,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Controllers\BaseController;
 
-class UsuariosController extends BaseController{
+class DetallesVentasController extends BaseController{
     public function getAll(Request $req, Response $res, $args){
         $context = $this->container->get('db');
         $qry = $context->query("SELECT * FROM detalles_venta");

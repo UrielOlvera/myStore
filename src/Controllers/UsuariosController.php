@@ -14,9 +14,15 @@ class UsuariosController extends BaseController{
             ->withHeader('Content-Type', 'application/json')
             ->withStatus(200);
     }
-    public function getElementById(Request $req, Response $res, array $args){
+    public function login(Request $req, Response $res, array $args){
         $context = $this->container->get('db');
-        $qry = $context->query("SELECT * FROM usuario WHERE usuario_id = " . $args['id']);
+
+        $data = json_decode($req->getBody(), true);
+
+        $qry = $context->prepare("SELECT * FROM usuario WHERE username = :username AND pass = :pass");
+        $qry->bindParam(':username', $data['username']);
+        $qry->bindParam(':pass', $data['pass']);
+        $qry->execute();
         $payload = json_encode($qry->fetch());
         $res->getBody()->write($payload);
         return $res
